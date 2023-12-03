@@ -77,8 +77,8 @@ func sumGearRatios(engine [][]rune, partsMap map[string]int) int {
 	for i, row := range engine {
 
 		for j, item := range row {
-			// it is a symbol
-			if !unicode.IsDigit(item) && item != '.' {
+			//if !unicode.IsDigit(item) && item != '.' { // this condition for part 1
+			if item == '*' {
 				arr := keysToCheck(i, j)
 
 				lastMatch := -1
