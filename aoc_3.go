@@ -11,7 +11,7 @@ import (
 
 func gearRatios() {
 
-	file, err := os.Open("input-files/aoc_3_1.txt")
+	file, err := os.Open("input-files/aoc_3_input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

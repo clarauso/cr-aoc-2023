@@ -12,7 +12,7 @@ import (
 )
 
 func trebuchet() {
-	file, err := os.Open("input-files/aoc_1.txt")
+	file, err := os.Open("input-files/aoc_1_input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

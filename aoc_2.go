@@ -26,7 +26,7 @@ var allCubes = map[string]int{"red": 12, "green": 13, "blue": 14}
 
 func cubeGame() {
 
-	file, err := os.Open("input-files/aoc_2.txt")
+	file, err := os.Open("input-files/aoc_2_input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
