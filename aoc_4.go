@@ -12,6 +12,14 @@ import (
 	"strings"
 )
 
+type Card struct {
+	idx            int
+	winningNumbers []int
+	playerNumbers  []int
+}
+
+var spaceRemRegex = regexp.MustCompile(` {2,}`)
+
 func scratchCards() {
 
 	file, err := os.Open("input-files/aoc_4_input.txt")
@@ -20,30 +28,37 @@ func scratchCards() {
 	}
 	defer file.Close()
 
-	total := 0
+	totalValue := 0
+	// how many additional cards each card id gives
+	allCopies := make([]int, 0)
 	scanner := bufio.NewScanner(file)
+
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 
-		idx, winning, myNumbers := parseCard(currentLine)
+		card := parseCard(currentLine)
+		// question 1
+		totalValue += card.evaluateCard()
+		// question 2
+		copies := card.countCopiesWon()
+		allCopies = append(allCopies, copies)
 
-		value := evaluateCard(winning, myNumbers)
-		total += value
-		fmt.Printf("Card %d has value %d\n", idx, value)
 	}
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	// answer is
-	fmt.Printf("Total is %d\n", total)
+	// answer is 17782
+	fmt.Printf("Total is %d\n", totalValue)
 
+	total := sumAllCopies(allCopies)
+	// answer is 8477787
+	fmt.Printf("Total is %d\n", total)
 }
 
-func parseCard(card string) (int, []int, []int) {
+func parseCard(card string) Card {
 	// clean the input to avoid parsing exceptions
-	spaceRemRegex := regexp.MustCompile(` {2,}`)
 	card = spaceRemRegex.ReplaceAllString(card, " ")
 
 	//[Card 1]:[41 48 83 86 17 | 83 86  6 31 17  9 48 53]
@@ -62,29 +77,20 @@ func parseCard(card string) (int, []int, []int) {
 	// 83 86 6 31 17  9 48 53
 	myNumbersString := second[1]
 
-	winning := make([]int, 0)
-	for _, v := range strings.Split(winningString, " ") {
-		num, _ := strconv.Atoi(v)
-		winning = append(winning, num)
-	}
+	winning := mapToArray(winningString)
+	myNumbers := mapToArray(myNumbersString)
 
-	myNumbers := make([]int, 0)
-	for _, v := range strings.Split(myNumbersString, " ") {
-		num, _ := strconv.Atoi(v)
-		myNumbers = append(myNumbers, num)
-	}
-
-	return idx, winning, myNumbers
-
+	return Card{idx: idx, winningNumbers: winning, playerNumbers: myNumbers}
 }
 
-func evaluateCard(winningNumbers []int, myNumbers []int) int {
+// for question 1
+func (c Card) evaluateCard() int {
 
 	// checks already done
 	checks := make(map[int]bool)
 	total := 0
-	for _, n := range myNumbers {
-		if slices.Contains(winningNumbers, n) {
+	for _, n := range c.playerNumbers {
+		if slices.Contains(c.winningNumbers, n) {
 
 			_, exists := checks[n]
 			if !exists {
@@ -95,8 +101,6 @@ func evaluateCard(winningNumbers []int, myNumbers []int) int {
 		}
 	}
 
-	fmt.Println(checks)
-
 	if total > 0 {
 		pow := math.Pow(2, float64(total-1))
 		total = int(pow)
@@ -104,4 +108,62 @@ func evaluateCard(winningNumbers []int, myNumbers []int) int {
 
 	return total
 
+}
+
+// how many copies of cards you win for the given one
+func (c Card) countCopiesWon() int {
+
+	// checks already done
+	checks := make(map[int]bool)
+	total := 0
+	for _, n := range c.playerNumbers {
+		if slices.Contains(c.winningNumbers, n) {
+
+			_, exists := checks[n]
+			if !exists {
+				checks[n] = true
+				total += 1
+			}
+
+		}
+	}
+
+	return total
+
+}
+
+func mapToArray(stringArray string) []int {
+
+	arr := make([]int, 0)
+	for _, v := range strings.Split(stringArray, " ") {
+		num, _ := strconv.Atoi(v)
+		arr = append(arr, num)
+	}
+
+	return arr
+}
+
+func sumAllCopies(allCopies []int) int {
+
+	totalCards := len(allCopies)
+	// final card counters set to 1
+	out := make([]int, totalCards)
+	for i := 0; i < totalCards; i++ {
+		out[i] = 1
+	}
+
+	for i, v := range allCopies {
+
+		for j := i + 1; j <= i+v; j++ {
+			out[j] += out[i]
+		}
+
+	}
+
+	total := 0
+	for _, num := range out {
+		total += num
+	}
+
+	return total
 }
