@@ -37,7 +37,8 @@ func seeds() {
 		currentLine := scanner.Text()
 
 		if linesRead == 0 {
-			seedList = mapSeedLine(currentLine)
+			//seedList = mapSeedLine(currentLine)
+			seedList = mapSeedLineWithRange(currentLine)
 		}
 
 		if mapNameLine.MatchString(currentLine) {
@@ -69,7 +70,6 @@ func seeds() {
 	}
 
 	minValue := math.MaxInt
-	// TODO map to location and get min location
 	for _, seed := range seedList {
 
 		value := seed
@@ -90,10 +90,30 @@ func seeds() {
 
 }
 
+// for part 1
 func mapSeedLine(line string) []int {
 	// seeds: 79 14 55 13
 	line = strings.ReplaceAll(line, "seeds: ", "")
 	return mapToArray(line)
+}
+
+// for part 2
+func mapSeedLineWithRange(line string) []int {
+	// seeds: 79 14 55 13
+
+	baseArray := mapSeedLine(line)
+	outArray := make([]int, 0)
+	n := len(baseArray)
+
+	for i := 0; i < n; i += 2 {
+		fmt.Printf("Index %d of %d will add %d\n", i, n, baseArray[i+1])
+		for j := 0; j < baseArray[i+1]; j++ {
+			item := baseArray[i] + j
+			outArray = append(outArray, item)
+		}
+	}
+
+	return outArray
 }
 
 func mapNumericLine(line string) (int, int, int) {
