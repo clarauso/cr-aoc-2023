@@ -36,20 +36,17 @@ func seeds() {
 	for scanner.Scan() {
 		currentLine := scanner.Text()
 
-		if linesRead == 0 {
+		switch {
+		case linesRead == 0:
 			seedList = mapSeedLine(currentLine)
-		}
-
-		if mapNameLine.MatchString(currentLine) {
+		case mapNameLine.MatchString(currentLine):
 			if currentMap != "" {
 				allMappingFn[currentMap] = mappingFunctions
 			}
 			matches := mapNameLine.FindStringSubmatch(currentLine)
 			currentMap = matches[1]
 			mappingFunctions = allMappingFn[currentMap]
-		}
-
-		if numLine.MatchString(currentLine) {
+		case numLine.MatchString(currentLine):
 			a, b, c := mapNumericLine(currentLine)
 			mappingFunctions = append(mappingFunctions, aToB(a, b, c))
 		}
