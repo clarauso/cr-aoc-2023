@@ -28,8 +28,8 @@ func seeds() {
 
 	linesRead := 0
 	var seedList []int
-	numLine := regexp.MustCompile(`^\d{1,} \d{1,} \d{1,}`)
-	mapNameLine := regexp.MustCompile(`^([a-z]{1,}-to-[a-z]{1,}) map:`)
+	numLine := regexp.MustCompile(`^\d{1,} \d{1,} \d{1,}$`)
+	mapNameLine := regexp.MustCompile(`^([a-z]{1,}-to-[a-z]{1,}) map:$`)
 	scanner := bufio.NewScanner(file)
 	var mappingFunctions []func(int) int
 	currentMap := ""
@@ -37,8 +37,7 @@ func seeds() {
 		currentLine := scanner.Text()
 
 		if linesRead == 0 {
-			//seedList = mapSeedLine(currentLine)
-			seedList = mapSeedLineWithRange(currentLine)
+			seedList = mapSeedLine(currentLine)
 		}
 
 		if mapNameLine.MatchString(currentLine) {
@@ -46,14 +45,12 @@ func seeds() {
 				allMappingFn[currentMap] = mappingFunctions
 			}
 			matches := mapNameLine.FindStringSubmatch(currentLine)
-			// TODO do not use hardcoded index
 			currentMap = matches[1]
 			mappingFunctions = allMappingFn[currentMap]
 		}
 
 		if numLine.MatchString(currentLine) {
 			a, b, c := mapNumericLine(currentLine)
-			//fmt.Printf("%d %d %d\n", a, b, c)
 			mappingFunctions = append(mappingFunctions, aToB(a, b, c))
 		}
 
@@ -69,51 +66,20 @@ func seeds() {
 		log.Fatal(err)
 	}
 
-	minValue := math.MaxInt
-	for _, seed := range seedList {
+	// 650599855 for part 1
+	sol1 := find(seedList, allMappingFn)
+	fmt.Printf("Min location (part 1) is %d\n", sol1)
 
-		value := seed
-		value = iterativeMap(value, allMappingFn["seed-to-soil"])
-		value = iterativeMap(value, allMappingFn["soil-to-fertilizer"])
-		value = iterativeMap(value, allMappingFn["fertilizer-to-water"])
-		value = iterativeMap(value, allMappingFn["water-to-light"])
-		value = iterativeMap(value, allMappingFn["light-to-temperature"])
-		value = iterativeMap(value, allMappingFn["temperature-to-humidity"])
-		value = iterativeMap(value, allMappingFn["humidity-to-location"])
-
-		if value < minValue {
-			minValue = value
-		}
-	}
-
-	fmt.Printf("Min location is %d\n", minValue)
+	sol2 := findAll(seedList, allMappingFn)
+	// 1240035 for part 2
+	fmt.Printf("Min location (part 2) is %d\n", sol2)
 
 }
 
-// for part 1
 func mapSeedLine(line string) []int {
 	// seeds: 79 14 55 13
 	line = strings.ReplaceAll(line, "seeds: ", "")
 	return mapToArray(line)
-}
-
-// for part 2
-func mapSeedLineWithRange(line string) []int {
-	// seeds: 79 14 55 13
-
-	baseArray := mapSeedLine(line)
-	outArray := make([]int, 0)
-	n := len(baseArray)
-
-	for i := 0; i < n; i += 2 {
-		fmt.Printf("Index %d of %d will add %d\n", i, n, baseArray[i+1])
-		for j := 0; j < baseArray[i+1]; j++ {
-			item := baseArray[i] + j
-			outArray = append(outArray, item)
-		}
-	}
-
-	return outArray
 }
 
 func mapNumericLine(line string) (int, int, int) {
@@ -138,7 +104,7 @@ func aToB(destRangeStart int, sourceRangeStart int, rangeLength int) func(int) i
 	return fn
 }
 
-func iterativeMap(toMap int, functions []func(int) int) int {
+func applyAll(toMap int, functions []func(int) int) int {
 	mapped := toMap
 	for _, myFn := range functions {
 		mapped = myFn(toMap)
@@ -148,4 +114,48 @@ func iterativeMap(toMap int, functions []func(int) int) int {
 	}
 
 	return mapped
+}
+
+func find(seedList []int, allMappingFn map[string][]func(int) int) int {
+	minValue := math.MaxInt
+	mappings := []string{"seed-to-soil", "soil-to-fertilizer", "fertilizer-to-water", "water-to-light", "light-to-temperature", "temperature-to-humidity", "humidity-to-location"}
+
+	for _, seed := range seedList {
+
+		value := seed
+		for _, mappingKey := range mappings {
+			value = applyAll(value, allMappingFn[mappingKey])
+		}
+
+		if value < minValue {
+			minValue = value
+		}
+	}
+
+	return minValue
+
+}
+
+func findAll(seedList []int, allMappingFn map[string][]func(int) int) int {
+	minValue := math.MaxInt
+	mappings := []string{"seed-to-soil", "soil-to-fertilizer", "fertilizer-to-water", "water-to-light", "light-to-temperature", "temperature-to-humidity", "humidity-to-location"}
+
+	n := len(seedList)
+
+	for i := 0; i < n; i += 2 {
+		fmt.Printf("Processing index %d out of %d\n", i, n)
+		for j := 0; j < seedList[i+1]; j++ {
+			value := seedList[i] + j
+			for _, mappingKey := range mappings {
+				value = applyAll(value, allMappingFn[mappingKey])
+			}
+
+			if value < minValue {
+				minValue = value
+			}
+		}
+	}
+
+	return minValue
+
 }
