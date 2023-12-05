@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -17,8 +16,6 @@ type Card struct {
 	winningNumbers []int
 	playerNumbers  []int
 }
-
-var spaceRemRegex = regexp.MustCompile(` {2,}`)
 
 func scratchCards() {
 
@@ -130,17 +127,6 @@ func (c Card) countCopiesWon() int {
 
 	return total
 
-}
-
-func mapToArray(stringArray string) []int {
-
-	arr := make([]int, 0)
-	for _, v := range strings.Split(stringArray, " ") {
-		num, _ := strconv.Atoi(v)
-		arr = append(arr, num)
-	}
-
-	return arr
 }
 
 func sumAllCopies(allCopies []int) int {
