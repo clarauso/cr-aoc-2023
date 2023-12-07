@@ -5,11 +5,9 @@ import (
 	"testing"
 )
 
-func TestDay07CamelCards(t *testing.T) {
+func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, expected1 int, expected2 int) {
 
-	expected1 := 248_836_197
-	expected2 := 251_195_607
-	sol1, sol2 := camelCards("input-files/day07_input.txt")
+	sol1, sol2 := toTest(inputFile)
 
 	log.Printf("Solution 1 %d, solution 2 %d", sol1, sol2)
 
@@ -20,5 +18,8 @@ func TestDay07CamelCards(t *testing.T) {
 	if sol2 != expected2 {
 		t.Fatalf("Solution 2 must be %d", expected2)
 	}
+}
 
+func TestDay07CamelCards(t *testing.T) {
+	runTest(t, camelCards, "input-files/day07_input.txt", 248_836_197, 251_195_607)
 }

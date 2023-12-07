@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"sort"
@@ -58,8 +57,6 @@ func camelCards(inputFilePath string) (int, int) {
 	for i, h := range hands {
 		sol1 += (i + 1) * h.bid
 	}
-	// must be 248836197
-	fmt.Printf("Solution 1 is %d\n", sol1)
 
 	// sol 2
 	sortHands(hands, valueGetterFn(true), cardValuesSecond)
@@ -67,8 +64,6 @@ func camelCards(inputFilePath string) (int, int) {
 	for i, h := range hands {
 		sol2 += (i + 1) * h.bid
 	}
-	// must be 251195607
-	fmt.Printf("Solution 2 is %d\n", sol2)
 
 	return sol1, sol2
 
