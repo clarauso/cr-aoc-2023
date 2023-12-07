@@ -30,7 +30,7 @@ const twoPairs int = 2  // two pair, where two cards share one label, two other 
 const aPair int = 1     // one pair, where two cards share one label, and the other three cards have a different label from the pair and each other
 const highCard int = 0  // high card, all cards have different labels
 
-func camelCards(inputFilePath string) {
+func camelCards(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -69,6 +69,8 @@ func camelCards(inputFilePath string) {
 	}
 	// must be 251195607
 	fmt.Printf("Solution 2 is %d\n", sol2)
+
+	return sol1, sol2
 
 }
 
