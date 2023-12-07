@@ -21,9 +21,18 @@ var cardValuesFirst = map[rune]int{'A': 13, 'K': 12, 'Q': 11, 'J': 10, 'T': 9, '
 
 var cardValuesSecond = map[rune]int{'A': 13, 'K': 12, 'Q': 11, 'T': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2, 'J': 1}
 
-func camelCards() {
+// values for hand types
+const fiveOf int = 6    // five of a kind, where all five cards have the same label
+const fourOf int = 5    // four of a kind, where four cards have the same label and one card has a different label
+const fullHouse int = 4 // full house, where three cards have the same label, and the remaining two cards share a different label
+const threeOf int = 3   // three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand
+const twoPairs int = 2  // two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label
+const aPair int = 1     // one pair, where two cards share one label, and the other three cards have a different label from the pair and each other
+const highCard int = 0  // high card, all cards have different labels
 
-	file, err := os.Open("input-files/day07_input.txt")
+func camelCards(inputFilePath string) {
+
+	file, err := os.Open(inputFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,52 +90,35 @@ func parseHand(line string) Hand {
 
 func computeHandValue(cards []rune) (int, int) {
 
-	labelCount := make(map[rune]int, 5)
-
+	// count how many occurrences there are for each card
+	cardCount := make(map[rune]int, 5)
 	for _, l := range cards {
 
-		_, x := labelCount[l]
+		_, x := cardCount[l]
 		if x {
-			labelCount[l] += 1
+			cardCount[l] += 1
 		} else {
-			labelCount[l] = 1
+			cardCount[l] = 1
 		}
 
 	}
 
-	// values for hand types
-	// - Five of a kind, where all five cards have the same label
-	// - Four of a kind, where four cards have the same label and one card has a different label
-	// - Full house, where three cards have the same label, and the remaining two cards share a different label
-	// - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand
-	// - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label
-	// - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other
-	const fiveOf = 6
-	const fourOf = 5
-	const fullHouse = 4
-	const threeOf = 3
-	const aPair = 1
-
 	pairs := 0
-	plainValue := 0
-	numJolly := 0
-	for k, v := range labelCount {
-
-		if k == 'J' {
-			numJolly = v
-		}
+	baseType := highCard
+	numJolly := cardCount['J']
+	for _, v := range cardCount {
 
 		switch v {
 
 		case 5:
 			// 5 of a kind
-			plainValue = fiveOf
+			baseType = fiveOf
 		case 4:
 			// 4 of a kind
-			plainValue = fourOf
+			baseType = fourOf
 		case 3:
 			// a tris, the hand can be full house OR 3 of a kind
-			plainValue = threeOf
+			baseType = threeOf
 		case 2:
 			// a pair, the hand can be one pair OR two pair
 			pairs++
@@ -134,58 +126,57 @@ func computeHandValue(cards []rune) (int, int) {
 
 	}
 
-	// pairs can be 1 (plainValue == 3, becomes full house) or 2 (plainValue == 0, becomes a pair)
-	val := plainValue + pairs
+	// pairs can be 0 (do not modify type), 1 (plainValue == 3, becomes full house) or 2 (plainValue == 0, becomes a pair)
+	baseType = baseType + pairs
 	// no J or all J: cannot add points
 	if numJolly == 0 || numJolly == 5 {
-		return val, val
+		return baseType, baseType
 	}
 
 	// here we have at least 1 J
-	var valWithJolly int
-	switch val {
-	case 5, 4:
+	var typeWithJolly int
+	switch baseType {
+	case fourOf, fullHouse:
 		// 4 of a kind XXXX Y OR full house (1 tris + 1 pair) XXX YY
 		// always becomes 5 of a kind
-		valWithJolly = fiveOf
-	case 3:
+		typeWithJolly = fiveOf
+	case threeOf:
 		// 3 of a kind XXX ZY
 		if numJolly == 2 {
 			// 2 J, becomes full house
-			valWithJolly = fullHouse
+			typeWithJolly = fullHouse
 		} else {
 			// 1 or 3 J, becomes 4 of a kind
-			valWithJolly = fourOf
+			typeWithJolly = fourOf
 		}
-	case 2:
+	case twoPairs:
 		// 2 pairs XX YY Z
 		if numJolly == 2 {
 			// 2 J, becomes 4 of a kind
-			valWithJolly = fourOf
+			typeWithJolly = fourOf
 		} else {
 			// 1 J, becomes a full house
-			valWithJolly = fullHouse
+			typeWithJolly = fullHouse
 		}
-	case 1:
+	case aPair:
 		// a pair XX YZW
 		// pair becomes 3 of a kind
-		valWithJolly = threeOf
-	case 0:
+		typeWithJolly = threeOf
+	case highCard:
 		// XZYWQ
 		// high card becomes a pair
-		valWithJolly = aPair
+		typeWithJolly = aPair
 	}
 
-	return val, valWithJolly
+	return baseType, typeWithJolly
 
 }
 
-// sort by hand value and card values (stopping at first different card)
+// Sorts by hand value and card values
 func sortHands(sli []Hand, handValExtractor func(Hand) int, cardValues map[rune]int) {
+	getVal := cardValueFn(cardValues)
+
 	sort.Slice(sli, func(i, j int) bool {
-
-		getVal := cardValueFn(cardValues)
-
 		iVal := handValExtractor(sli[i])
 		jVal := handValExtractor(sli[j])
 
@@ -210,6 +201,7 @@ func sortHands(sli []Hand, handValExtractor func(Hand) int, cardValues map[rune]
 	})
 }
 
+// Returns a function that provides the value of a given card using the input map
 func cardValueFn(cardValues map[rune]int) func(rune) int {
 
 	return func(card rune) int {
