@@ -53,7 +53,7 @@ func camelCards(inputFilePath string) {
 	}
 
 	// sol 1
-	sortHands(hands, sortingFieldGetter(false), cardValuesFirst)
+	sortHands(hands, valueGetterFn(false), cardValuesFirst)
 	sol1 := 0
 	for i, h := range hands {
 		sol1 += (i + 1) * h.bid
@@ -62,7 +62,7 @@ func camelCards(inputFilePath string) {
 	fmt.Printf("Solution 1 is %d\n", sol1)
 
 	// sol 2
-	sortHands(hands, sortingFieldGetter(true), cardValuesSecond)
+	sortHands(hands, valueGetterFn(true), cardValuesSecond)
 	sol2 := 0
 	for i, h := range hands {
 		sol2 += (i + 1) * h.bid
@@ -146,22 +146,15 @@ func computeTypeWithJolly(baseType int, numJolly int) int {
 	if numJolly == 0 || numJolly == 5 {
 		return baseType
 	}
-
+	// 1 to 4 J here
 	var typeWithJolly int
 	switch baseType {
 	case fourOf, fullHouse:
-		// 4 of a kind XXXX Y OR full house (1 tris + 1 pair) XXX YY
-		// always becomes 5 of a kind
+		// 4 of a kind XXXX Y OR full house XXX YY: both become 5 of a kind
 		typeWithJolly = fiveOf
 	case threeOf:
-		// 3 of a kind XXX ZY
-		if numJolly == 2 {
-			// 2 J, becomes full house
-			typeWithJolly = fullHouse
-		} else {
-			// 1 or 3 J, becomes 4 of a kind
-			typeWithJolly = fourOf
-		}
+		// 3 of a kind XXX ZY, we can have 1 or 3 jolly: both become 4 of a kind
+		typeWithJolly = fourOf
 	case twoPairs:
 		// 2 pairs XX YY Z
 		if numJolly == 2 {
@@ -172,11 +165,9 @@ func computeTypeWithJolly(baseType int, numJolly int) int {
 			typeWithJolly = fullHouse
 		}
 	case aPair:
-		// a pair XX YZW
-		// pair becomes 3 of a kind
+		// a pair XX YZW, becomes 3 of a kind
 		typeWithJolly = threeOf
 	case highCard:
-		// XZYWQ
 		// high card becomes a pair
 		typeWithJolly = aPair
 	}
@@ -192,8 +183,12 @@ func sortHands(sli []Hand, handValExtractor func(Hand) int, cardValues map[rune]
 		iVal := handValExtractor(sli[i])
 		jVal := handValExtractor(sli[j])
 
-		if iVal == jVal {
+		if iVal != jVal {
 
+			return iVal < jVal
+
+		} else {
+			// if the values are equal, sort using card values
 			var r bool
 			for k, _ := range sli[i].cards {
 				// same card, keep comparing
@@ -205,9 +200,6 @@ func sortHands(sli []Hand, handValExtractor func(Hand) int, cardValues map[rune]
 			}
 
 			return r
-
-		} else {
-			return iVal < jVal
 		}
 
 	})
@@ -222,10 +214,10 @@ func cardValueFn(cardValues map[rune]int) func(rune) int {
 
 }
 
-// Returns a function that reads the field to be considered for sorting
-func sortingFieldGetter(considerJolly bool) func(Hand) int {
+// Returns a function that reads the value field of an hand
+func valueGetterFn(withJolly bool) func(Hand) int {
 
-	if considerJolly {
+	if withJolly {
 		return func(h Hand) int { return h.handValueJolly }
 	} else {
 		return func(h Hand) int { return h.handValue }
