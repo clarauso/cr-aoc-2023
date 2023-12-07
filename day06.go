@@ -28,8 +28,6 @@ func boatRace() {
 		currentLine = strings.ReplaceAll(currentLine, "Time: ", "")
 		currentLine = strings.ReplaceAll(currentLine, "Distance: ", "")
 
-		fmt.Println(currentLine)
-
 		switch {
 		case linesRead == 0:
 			timeSli = mapToArray(currentLine)
@@ -42,8 +40,6 @@ func boatRace() {
 		linesRead++
 
 	}
-
-	fmt.Printf("%d %d\n", singleTime, singleDistance)
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
