@@ -82,13 +82,13 @@ func parseHand(line string) Hand {
 		runes[i] = v
 	}
 
-	val, valJolly := computeHandValue(runes)
+	val, valJolly := computeCardsValue(runes)
 
 	return Hand{cards: runes, bid: bid, handValue: val, handValueJolly: valJolly}
 
 }
 
-func computeHandValue(cards []rune) (int, int) {
+func computeCardsValue(cards []rune) (int, int) {
 
 	// count how many occurrences there are for each card
 	cardCount := make(map[rune]int, 5)
@@ -103,9 +103,19 @@ func computeHandValue(cards []rune) (int, int) {
 
 	}
 
-	pairs := 0
-	baseType := highCard
+	baseType := computeType(cardCount)
 	numJolly := cardCount['J']
+	typeWithJolly := computeTypeWithJolly(baseType, numJolly)
+
+	return baseType, typeWithJolly
+
+}
+
+// Computes hand's type with the given number of jolly cards
+func computeType(cardCount map[rune]int) int {
+	baseType := highCard
+	pairs := 0
+
 	for _, v := range cardCount {
 
 		switch v {
@@ -127,13 +137,16 @@ func computeHandValue(cards []rune) (int, int) {
 	}
 
 	// pairs can be 0 (do not modify type), 1 (plainValue == 3, becomes full house) or 2 (plainValue == 0, becomes a pair)
-	baseType = baseType + pairs
+	return baseType + pairs
+}
+
+// Computes hand's type with the given number of jolly cards
+func computeTypeWithJolly(baseType int, numJolly int) int {
 	// no J or all J: cannot add points
 	if numJolly == 0 || numJolly == 5 {
-		return baseType, baseType
+		return baseType
 	}
 
-	// here we have at least 1 J
 	var typeWithJolly int
 	switch baseType {
 	case fourOf, fullHouse:
@@ -168,8 +181,7 @@ func computeHandValue(cards []rune) (int, int) {
 		typeWithJolly = aPair
 	}
 
-	return baseType, typeWithJolly
-
+	return typeWithJolly
 }
 
 // Sorts by hand value and card values
