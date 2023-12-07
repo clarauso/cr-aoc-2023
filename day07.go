@@ -30,20 +30,13 @@ func camelCards() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	linesRead := 0
 	hands := make([]Hand, 0)
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
-
 		currentLine = spaceRemRegex.ReplaceAllString(currentLine, " ")
-
 		h := parseHand(currentLine)
-
 		hands = append(hands, h)
-
-		linesRead++
-
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -51,7 +44,7 @@ func camelCards() {
 	}
 
 	// sol 1
-	sortHands(hands, extractValue(false), cardValuesFirst)
+	sortHands(hands, sortingFieldGetter(false), cardValuesFirst)
 	sol1 := 0
 	for i, h := range hands {
 		sol1 += (i + 1) * h.bid
@@ -60,7 +53,7 @@ func camelCards() {
 	fmt.Printf("Solution 1 is %d\n", sol1)
 
 	// sol 2
-	sortHands(hands, extractValue(true), cardValuesSecond)
+	sortHands(hands, sortingFieldGetter(true), cardValuesSecond)
 	sol2 := 0
 	for i, h := range hands {
 		sol2 += (i + 1) * h.bid
@@ -101,6 +94,19 @@ func computeHandValue(cards []rune) (int, int) {
 
 	}
 
+	// values for hand types
+	// - Five of a kind, where all five cards have the same label
+	// - Four of a kind, where four cards have the same label and one card has a different label
+	// - Full house, where three cards have the same label, and the remaining two cards share a different label
+	// - Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand
+	// - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label
+	// - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other
+	const fiveOf = 6
+	const fourOf = 5
+	const fullHouse = 4
+	const threeOf = 3
+	const aPair = 1
+
 	pairs := 0
 	plainValue := 0
 	numJolly := 0
@@ -110,24 +116,17 @@ func computeHandValue(cards []rune) (int, int) {
 			numJolly = v
 		}
 
-		// Five of a kind, where all five cards have the same label: AAAAA
-		// Four of a kind, where four cards have the same label and one card has a different label: AA8AA
-		// Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
-		// Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
-		// Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
-		// One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
-
 		switch v {
 
 		case 5:
 			// 5 of a kind
-			plainValue = 6
+			plainValue = fiveOf
 		case 4:
 			// 4 of a kind
-			plainValue = 5
+			plainValue = fourOf
 		case 3:
 			// a tris, the hand can be full house OR 3 of a kind
-			plainValue = 3
+			plainValue = threeOf
 		case 2:
 			// a pair, the hand can be one pair OR two pair
 			pairs++
@@ -135,7 +134,7 @@ func computeHandValue(cards []rune) (int, int) {
 
 	}
 
-	// pairs can be 1 (plainValue == 3) or 2 (plainValue == 0)
+	// pairs can be 1 (plainValue == 3, becomes full house) or 2 (plainValue == 0, becomes a pair)
 	val := plainValue + pairs
 	// no J or all J: cannot add points
 	if numJolly == 0 || numJolly == 5 {
@@ -143,48 +142,41 @@ func computeHandValue(cards []rune) (int, int) {
 	}
 
 	// here we have at least 1 J
-	var valJolly int
+	var valWithJolly int
 	switch val {
-	case 5:
-		// 4 of a kind XXXX Y
+	case 5, 4:
+		// 4 of a kind XXXX Y OR full house (1 tris + 1 pair) XXX YY
 		// always becomes 5 of a kind
-		valJolly = 6
-	case 4:
-		// full house (1 tris + 1 pair) XXX YY
-		// always becomes 5 of a kind
-		valJolly = 6
+		valWithJolly = fiveOf
 	case 3:
 		// 3 of a kind XXX ZY
-		if numJolly == 3 || numJolly == 1 {
-			// becomes 4 of a kind
-			valJolly = 5
-		} else if numJolly == 2 {
-			// becomes full house
-			valJolly = 4
+		if numJolly == 2 {
+			// 2 J, becomes full house
+			valWithJolly = fullHouse
+		} else {
+			// 1 or 3 J, becomes 4 of a kind
+			valWithJolly = fourOf
 		}
-		fmt.Printf("Cards %s %d %d\n", string(cards), val, valJolly)
 	case 2:
 		// 2 pairs XX YY Z
 		if numJolly == 2 {
-			// becomes 4 of a kind
-			valJolly = 5
-		} else if numJolly == 1 {
-			// becomes a full house
-			valJolly = 4
+			// 2 J, becomes 4 of a kind
+			valWithJolly = fourOf
+		} else {
+			// 1 J, becomes a full house
+			valWithJolly = fullHouse
 		}
 	case 1:
 		// a pair XX YZW
-		// pair becomes a tris
-		valJolly = 3
-
+		// pair becomes 3 of a kind
+		valWithJolly = threeOf
 	case 0:
 		// XZYWQ
 		// high card becomes a pair
-		valJolly = 1
-
+		valWithJolly = aPair
 	}
 
-	return val, valJolly
+	return val, valWithJolly
 
 }
 
@@ -226,7 +218,8 @@ func cardValueFn(cardValues map[rune]int) func(rune) int {
 
 }
 
-func extractValue(considerJolly bool) func(Hand) int {
+// Returns a function that reads the field to be considered for sorting
+func sortingFieldGetter(considerJolly bool) func(Hand) int {
 
 	if considerJolly {
 		return func(h Hand) int { return h.handValueJolly }
