@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+const inputPath string = "input-files/"
+
 func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, expected1 int, expected2 int) {
 
 	sol1, sol2 := toTest(inputFile)
@@ -21,5 +23,11 @@ func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, exp
 }
 
 func TestDay07CamelCards(t *testing.T) {
-	runTest(t, camelCards, "input-files/day07_input.txt", 248_836_197, 251_195_607)
+	filename := inputPath + "day07_input.txt"
+	runTest(t, camelCards, filename, 248_836_197, 251_195_607)
+}
+
+func TestDay08Wasteland(t *testing.T) {
+	filename := inputPath + "day08_input.txt"
+	runTest(t, wasteland, filename, 19_099, 17_099_847_107_071)
 }

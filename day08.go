@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 )
 
 type Node struct {
@@ -35,7 +36,6 @@ func wasteland(inputFilePath string) (int, int) {
 		switch {
 		case linesRead == 0:
 			instructions = parseWastelandInstructions(currentLine)
-			fmt.Println(instructions)
 		case len(currentLine) == 0:
 			continue
 		default:
@@ -56,10 +56,11 @@ func wasteland(inputFilePath string) (int, int) {
 
 	// sol 1
 	sol1 := goTo(nodesMap["AAA"], "ZZZ", instructions)
-	fmt.Println(sol1)
 
 	// sol 2
-	sol2 := 0
+	startingSli := getStartingNodes(nodesMap)
+	endingSli := getEndingNodes(nodesMap)
+	sol2 := goToList(startingSli, endingSli, instructions)
 
 	return sol1, sol2
 
@@ -71,7 +72,7 @@ func parseWastelandInstructions(line string) []rune {
 
 func parseWastelandNode(line string) (Node, string, string) {
 
-	wastelandInputLineRegex := regexp.MustCompile(`([A-Z]{3}) = \(([A-Z]{3}), ([A-Z]{3})\)`)
+	wastelandInputLineRegex := regexp.MustCompile(`([A-Z0-9]{3}) = \(([A-Z0-9]{3}), ([A-Z0-9]{3})\)`)
 
 	sli := wastelandInputLineRegex.FindStringSubmatch(line)
 
@@ -96,18 +97,100 @@ func goTo(start *Node, endLabel string, instructions []rune) int {
 
 	for current.label != endLabel {
 		for _, r := range instructions {
-
-			switch r {
-			case 'L':
-				current = current.left
-			case 'R':
-				current = current.right
-			}
-
+			current = nextNode(current, r)
 			steps++
-
 		}
 	}
 
 	return steps
+}
+
+func goToList(start []*Node, end []*Node, instructions []rune) int {
+
+	lengths := make([]int, 0)
+
+	for _, s := range start {
+
+		for _, e := range end {
+			conn := areConnected(*s, *e)
+
+			if conn {
+				fmt.Printf("Going from %s to %s is possible\n", s.label, e.label)
+
+				n := goTo(s, e.label, instructions)
+				lengths = append(lengths, n)
+			}
+
+		}
+
+	}
+
+	steps := leastCommonMultiple(lengths[0], lengths[1], lengths[2:]...)
+
+	return steps
+}
+
+func nextNode(current *Node, direction rune) *Node {
+
+	switch direction {
+	case 'L':
+		current = current.left
+	case 'R':
+		current = current.right
+	}
+
+	return current
+}
+
+func getStartingNodes(nodesMap map[string]*Node) []*Node {
+
+	out := make([]*Node, 0)
+	for _, n := range nodesMap {
+		if strings.LastIndex(n.label, "A") == len(n.label)-1 {
+			out = append(out, n)
+		}
+	}
+
+	return out
+
+}
+
+func getEndingNodes(nodesMap map[string]*Node) []*Node {
+
+	out := make([]*Node, 0)
+	for _, n := range nodesMap {
+		if strings.LastIndex(n.label, "Z") == len(n.label)-1 {
+			out = append(out, n)
+		}
+	}
+
+	return out
+
+}
+
+// Checks if a path exists between a and b. Based on https://stackoverflow.com/a/354366/2924050
+func areConnected(a Node, b Node) bool {
+
+	toDo := make(map[string]Node, 0)
+	done := make(map[string]Node, 0)
+
+	toDo[a.label] = a
+	for len(toDo) > 0 {
+		current := pop(toDo)
+		done[current.label] = current
+		if current.left.label == b.label || current.right.label == b.label {
+			return true
+		}
+		_, x1 := done[current.left.label]
+		if !x1 {
+			toDo[current.left.label] = *current.left
+		}
+		_, x2 := done[current.right.label]
+		if !x2 {
+			toDo[current.right.label] = *current.right
+		}
+
+	}
+
+	return false
 }
