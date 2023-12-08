@@ -18,3 +18,7 @@ func mapToArray(stringArray string) []int {
 
 	return arr
 }
+
+func mapToRuneSlice(input string) []rune {
+	return []rune(input)
+}

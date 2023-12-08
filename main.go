@@ -2,5 +2,5 @@ package main
 
 func main() {
 
-	camelCards("input-files/day07_input.txt")
+	wasteland("input-files/day08_input.txt")
 }
