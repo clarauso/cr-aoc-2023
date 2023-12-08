@@ -11,6 +11,7 @@ func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, exp
 
 	sol1, sol2 := toTest(inputFile)
 
+	log.Println(t.Name())
 	log.Printf("Solution 1 %d, solution 2 %d", sol1, sol2)
 
 	if sol1 != expected1 {
