@@ -9,9 +9,9 @@ const inputPath string = "input-files/"
 
 func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, expected1 int, expected2 int) {
 
+	log.Println(t.Name())
 	sol1, sol2 := toTest(inputFile)
 
-	log.Println(t.Name())
 	log.Printf("Solution 1 %d, solution 2 %d", sol1, sol2)
 
 	if sol1 != expected1 {
