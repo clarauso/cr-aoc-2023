@@ -142,11 +142,11 @@ func nextNode(current *Node, direction rune) *Node {
 	return current
 }
 
-func getStartingNodes(nodesMap map[string]*Node) []*Node {
+func filter(nodesMap map[string]*Node, predicate func(Node) bool) []*Node {
 
 	out := make([]*Node, 0)
 	for _, n := range nodesMap {
-		if strings.LastIndex(n.label, "A") == len(n.label)-1 {
+		if predicate(*n) {
 			out = append(out, n)
 		}
 	}
@@ -155,16 +155,21 @@ func getStartingNodes(nodesMap map[string]*Node) []*Node {
 
 }
 
+func getStartingNodes(nodesMap map[string]*Node) []*Node {
+
+	predicate := func(n Node) bool {
+		return strings.LastIndex(n.label, "A") == len(n.label)-1
+	}
+	return filter(nodesMap, predicate)
+
+}
+
 func getEndingNodes(nodesMap map[string]*Node) []*Node {
 
-	out := make([]*Node, 0)
-	for _, n := range nodesMap {
-		if strings.LastIndex(n.label, "Z") == len(n.label)-1 {
-			out = append(out, n)
-		}
+	predicate := func(n Node) bool {
+		return strings.LastIndex(n.label, "Z") == len(n.label)-1
 	}
-
-	return out
+	return filter(nodesMap, predicate)
 
 }
 
