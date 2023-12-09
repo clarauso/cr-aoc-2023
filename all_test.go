@@ -32,3 +32,8 @@ func TestDay08Wasteland(t *testing.T) {
 	filename := inputPath + "day08_input.txt"
 	runTest(t, wasteland, filename, 19_099, 17_099_847_107_071)
 }
+
+func TestDay09Oasis(t *testing.T) {
+	filename := inputPath + "day09_input.txt"
+	runTest(t, oasisReport, filename, 1_641_934_234, 975)
+}

@@ -2,5 +2,5 @@ package main
 
 func main() {
 
-	wasteland("input-files/day08_input.txt")
+	oasisReport("input-files/day09_input.txt")
 }
