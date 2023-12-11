@@ -1,10 +1,16 @@
 package main
 
 import (
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
 )
+
+type Point struct {
+	x int
+	y int
+}
 
 var spaceRemRegex = regexp.MustCompile(` {2,}`)
 
@@ -55,4 +61,13 @@ func pop[K string, V any](m map[K]V) V {
 	}
 
 	return out
+}
+
+func (p1 Point) manhattanDistance(p2 Point) int {
+
+	xDelta := math.Abs(float64(p1.x - p2.x))
+	yDelta := math.Abs(float64(p1.y - p2.y))
+
+	return int(xDelta + yDelta)
+
 }

@@ -37,3 +37,8 @@ func TestDay09Oasis(t *testing.T) {
 	filename := inputPath + "day09_input.txt"
 	runTest(t, oasisReport, filename, 1_641_934_234, 975)
 }
+
+func TestDay11CosmicExpansion(t *testing.T) {
+	filename := inputPath + "day11_input.txt"
+	runTest(t, cosmicExpansion, filename, 9_312_968, 597_714_117_556)
+}
