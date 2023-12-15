@@ -2,5 +2,5 @@ package main
 
 func main() {
 
-	cosmicExpansion("input-files/day11_input.txt")
+	lensLibrary("input-files/day15_input.txt")
 }
