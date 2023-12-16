@@ -2,11 +2,17 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
+
+type Lens struct {
+	label       string
+	focalLength int
+}
 
 func lensLibrary(inputFilePath string) (int, int) {
 
@@ -18,14 +24,12 @@ func lensLibrary(inputFilePath string) (int, int) {
 
 	scanner := bufio.NewScanner(file)
 	sol1 := 0
-	sol2 := 0
+
 	var steps []string
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
-
 		steps = strings.Split(currentLine, ",")
-		fmt.Println(currentLine)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -36,10 +40,8 @@ func lensLibrary(inputFilePath string) (int, int) {
 		sol1 += stepHash(s)
 	}
 
-	// 513172
-	fmt.Printf("%d\n", sol1)
-
-	fmt.Printf("%d\n", sol2)
+	out := boxToHashMap(steps)
+	sol2 := totalMapValue(out)
 
 	return sol1, sol2
 
@@ -55,8 +57,72 @@ func stepHash(input string) int {
 		out %= 256
 	}
 
-	fmt.Printf("%s becomes %d\n", input, out)
-
 	return out
+
+}
+
+func boxToHashMap(steps []string) [][]Lens {
+
+	var hashMap [256][]Lens
+	fLengthRegex := regexp.MustCompile(`([a-z]+)(=([0-9]+)|-)`)
+
+	for _, s := range steps {
+
+		matches := fLengthRegex.FindStringSubmatch(s)
+		label := matches[1]
+		idx := stepHash(label)
+		currentList := hashMap[idx]
+
+		// remove
+		if matches[2] == "-" {
+			for i, l := range currentList {
+				// remove the value
+				if l.label == label {
+					currentList = append(currentList[0:i], currentList[i+1:]...)
+					hashMap[idx] = currentList
+				}
+			}
+			continue
+		}
+
+		focalLength, err := strconv.Atoi(matches[3])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// create a new lens
+		lens := Lens{label: label, focalLength: focalLength}
+		// add
+		found := false
+		for i, l := range currentList {
+			// replace the value
+			if l.label == label {
+				currentList[i] = lens
+				found = true
+			}
+		}
+		if !found {
+			currentList = append(currentList, lens)
+		}
+		// update the list
+		hashMap[idx] = currentList
+	}
+
+	return hashMap[0:]
+
+}
+
+func totalMapValue(hashMap [][]Lens) int {
+
+	tot := 0
+	for box, slots := range hashMap {
+
+		for slotIdx, lens := range slots {
+			tot += (box + 1) * (slotIdx + 1) * lens.focalLength
+		}
+
+	}
+
+	return tot
 
 }

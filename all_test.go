@@ -42,3 +42,8 @@ func TestDay11CosmicExpansion(t *testing.T) {
 	filename := inputPath + "day11_input.txt"
 	runTest(t, cosmicExpansion, filename, 9_312_968, 597_714_117_556)
 }
+
+func TestDay15LensLibrary(t *testing.T) {
+	filename := inputPath + "day15_input.txt"
+	runTest(t, lensLibrary, filename, 513_172, 237_806)
+}
