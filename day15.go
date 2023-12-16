@@ -99,6 +99,7 @@ func boxToHashMap(steps []string) [][]Lens {
 			if l.label == label {
 				currentList[i] = lens
 				found = true
+				break
 			}
 		}
 		if !found {
