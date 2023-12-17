@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/clarauso/cr-aoc-2023/day15"
+	"github.com/clarauso/cr-aoc-2023/day14"
 )
 
 func main() {
 
-	day15.LensLibrary("day15/input.txt")
+	day14.ReflectorDish("day14/example.txt")
 }
