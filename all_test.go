@@ -11,8 +11,6 @@ import (
 	"github.com/clarauso/cr-aoc-2023/day15"
 )
 
-const inputPath string = "input-files/"
-
 func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, expected1 int, expected2 int) {
 
 	log.Println(t.Name())
