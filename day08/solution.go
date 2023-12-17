@@ -1,4 +1,4 @@
-package main
+package day08
 
 import (
 	"bufio"
@@ -7,6 +7,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/clarauso/cr-aoc-2023/utils"
 )
 
 type Node struct {
@@ -15,7 +17,7 @@ type Node struct {
 	right *Node
 }
 
-func wasteland(inputFilePath string) (int, int) {
+func Wasteland(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -67,7 +69,7 @@ func wasteland(inputFilePath string) (int, int) {
 }
 
 func parseWastelandInstructions(line string) []rune {
-	return mapToRuneSlice(line)
+	return utils.MapToRuneSlice(line)
 }
 
 func parseWastelandNode(line string) (Node, string, string) {
@@ -125,7 +127,7 @@ func goToList(start []*Node, end []*Node, instructions []rune) int {
 
 	}
 
-	steps := leastCommonMultiple(lengths[0], lengths[1], lengths[2:]...)
+	steps := utils.LeastCommonMultiple(lengths[0], lengths[1], lengths[2:]...)
 
 	return steps
 }
@@ -181,7 +183,7 @@ func areConnected(a Node, b Node) bool {
 
 	toDo[a.label] = a
 	for len(toDo) > 0 {
-		current := pop(toDo)
+		current := utils.Pop(toDo)
 		done[current.label] = current
 		if current.left.label == b.label || current.right.label == b.label {
 			return true

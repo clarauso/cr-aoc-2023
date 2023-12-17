@@ -1,4 +1,4 @@
-package main
+package day11
 
 import (
 	"bufio"
@@ -6,11 +6,13 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/clarauso/cr-aoc-2023/utils"
 )
 
 type Universe [][]rune
 
-func cosmicExpansion(inputFilePath string) (int, int) {
+func CosmicExpansion(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -23,7 +25,7 @@ func cosmicExpansion(inputFilePath string) (int, int) {
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
-		row := mapToRuneSlice(currentLine)
+		row := utils.MapToRuneSlice(currentLine)
 		universe = append(universe, row)
 	}
 
@@ -74,9 +76,9 @@ func expand(u Universe) ([]int, []int) {
 
 }
 
-func galaxiesLocator(u Universe, columnsToExpand []int, rowsToExpand []int, modifier int) []Point {
+func galaxiesLocator(u Universe, columnsToExpand []int, rowsToExpand []int, modifier int) []utils.Point {
 
-	out := make([]Point, 0)
+	out := make([]utils.Point, 0)
 	for i, _ := range u {
 		for j, v := range u[i] {
 
@@ -96,7 +98,7 @@ func galaxiesLocator(u Universe, columnsToExpand []int, rowsToExpand []int, modi
 					}
 				}
 
-				out = append(out, Point{x: j + plusCol, y: i + plusRow})
+				out = append(out, utils.Point{X: j + plusCol, Y: i + plusRow})
 			}
 
 		}
@@ -106,7 +108,7 @@ func galaxiesLocator(u Universe, columnsToExpand []int, rowsToExpand []int, modi
 
 }
 
-func sumDistances(points []Point) int {
+func sumDistances(points []utils.Point) int {
 
 	total := 0
 	for i, p := range points {
@@ -115,7 +117,7 @@ func sumDistances(points []Point) int {
 			if i <= j {
 				continue
 			}
-			d := p.manhattanDistance(q)
+			d := p.ManhattanDistance(q)
 			total += d
 
 		}

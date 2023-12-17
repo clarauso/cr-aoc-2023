@@ -1,4 +1,4 @@
-package main
+package day01
 
 import (
 	"bufio"
@@ -11,8 +11,8 @@ import (
 	"unicode"
 )
 
-func trebuchet() {
-	file, err := os.Open("input-files/aoc_1_input.txt")
+func Trebuchet(inputFilePath string) {
+	file, err := os.Open(inputFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

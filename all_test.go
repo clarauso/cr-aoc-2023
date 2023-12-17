@@ -3,6 +3,12 @@ package main
 import (
 	"log"
 	"testing"
+
+	"github.com/clarauso/cr-aoc-2023/day07"
+	"github.com/clarauso/cr-aoc-2023/day08"
+	"github.com/clarauso/cr-aoc-2023/day09"
+	"github.com/clarauso/cr-aoc-2023/day11"
+	"github.com/clarauso/cr-aoc-2023/day15"
 )
 
 const inputPath string = "input-files/"
@@ -24,26 +30,26 @@ func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, exp
 }
 
 func TestDay07CamelCards(t *testing.T) {
-	filename := inputPath + "day07_input.txt"
-	runTest(t, camelCards, filename, 248_836_197, 251_195_607)
+	filename := "day07/input.txt"
+	runTest(t, day07.CamelCards, filename, 248_836_197, 251_195_607)
 }
 
 func TestDay08Wasteland(t *testing.T) {
-	filename := inputPath + "day08_input.txt"
-	runTest(t, wasteland, filename, 19_099, 17_099_847_107_071)
+	filename := "day08/input.txt"
+	runTest(t, day08.Wasteland, filename, 19_099, 17_099_847_107_071)
 }
 
 func TestDay09Oasis(t *testing.T) {
-	filename := inputPath + "day09_input.txt"
-	runTest(t, oasisReport, filename, 1_641_934_234, 975)
+	filename := "day09/input.txt"
+	runTest(t, day09.OasisReport, filename, 1_641_934_234, 975)
 }
 
 func TestDay11CosmicExpansion(t *testing.T) {
-	filename := inputPath + "day11_input.txt"
-	runTest(t, cosmicExpansion, filename, 9_312_968, 597_714_117_556)
+	filename := "day11/input.txt"
+	runTest(t, day11.CosmicExpansion, filename, 9_312_968, 597_714_117_556)
 }
 
 func TestDay15LensLibrary(t *testing.T) {
-	filename := inputPath + "day15_input.txt"
-	runTest(t, lensLibrary, filename, 513_172, 237_806)
+	filename := "day15/input.txt"
+	runTest(t, day15.LensLibrary, filename, 513_172, 237_806)
 }

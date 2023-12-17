@@ -1,13 +1,15 @@
-package main
+package day09
 
 import (
 	"bufio"
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/clarauso/cr-aoc-2023/utils"
 )
 
-func oasisReport(inputFilePath string) (int, int) {
+func OasisReport(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -21,7 +23,7 @@ func oasisReport(inputFilePath string) (int, int) {
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
-		sli := mapToArray(currentLine)
+		sli := utils.MapToArray(currentLine)
 
 		compSeq := extrapolatedDiff(sli)
 		a, b := extrapolate(sli, compSeq)

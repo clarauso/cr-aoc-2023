@@ -1,4 +1,4 @@
-package main
+package day07
 
 import (
 	"bufio"
@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/clarauso/cr-aoc-2023/utils"
 )
 
 type Hand struct {
@@ -29,7 +31,7 @@ const twoPairs int = 2  // two pair, where two cards share one label, two other 
 const aPair int = 1     // one pair, where two cards share one label, and the other three cards have a different label from the pair and each other
 const highCard int = 0  // high card, all cards have different labels
 
-func camelCards(inputFilePath string) (int, int) {
+func CamelCards(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -42,7 +44,7 @@ func camelCards(inputFilePath string) (int, int) {
 
 	for scanner.Scan() {
 		currentLine := scanner.Text()
-		currentLine = spaceRemRegex.ReplaceAllString(currentLine, " ")
+		currentLine = utils.SpaceRemRegex.ReplaceAllString(currentLine, " ")
 		h := parseHand(currentLine)
 		hands = append(hands, h)
 	}

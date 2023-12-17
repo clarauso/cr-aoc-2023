@@ -1,4 +1,4 @@
-package main
+package day15
 
 import (
 	"bufio"
@@ -14,7 +14,7 @@ type Lens struct {
 	focalLength int
 }
 
-func lensLibrary(inputFilePath string) (int, int) {
+func LensLibrary(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
