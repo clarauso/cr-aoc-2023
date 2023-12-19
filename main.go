@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/clarauso/cr-aoc-2023/day14"
+	"github.com/clarauso/cr-aoc-2023/day19"
 )
 
 func main() {
 
-	day14.ReflectorDish("day14/example.txt")
+	day19.Aplenty("day19/input.txt")
 }
