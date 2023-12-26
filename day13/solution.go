@@ -1,4 +1,4 @@
-package main
+package day13
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 	"github.com/clarauso/cr-aoc-2023/utils"
 )
 
-func pointOfIncidence(inputFilePath string) (int, int) {
+func PointOfIncidence(inputFilePath string) (int, int) {
 
 	file, err := os.Open(inputFilePath)
 	if err != nil {
@@ -30,8 +30,8 @@ func pointOfIncidence(inputFilePath string) (int, int) {
 			left, above := evalPattern(pattern)
 			sol1 += left
 			sol1 += above
-			pp := fixSmudge(pattern)
-			l2, a2 := evalPattern(pp)
+
+			l2, a2 := evalPatternWithSmudge(pattern)
 			sol2 += l2
 			sol2 += a2
 			// reset pattern
@@ -48,14 +48,14 @@ func pointOfIncidence(inputFilePath string) (int, int) {
 	left, above := evalPattern(pattern)
 	sol1 += left
 	sol1 += above
-	pp := fixSmudge(pattern)
-	l2, a2 := evalPattern(pp)
+
+	l2, a2 := evalPatternWithSmudge(pattern)
 	sol2 += l2
 	sol2 += a2
 
 	// 27502
 	fmt.Printf("%d\n", sol1)
-	// 31102 too low
+	// 31102 too low, 37350 and 35846 too high, 31947...
 	fmt.Printf("%d\n", sol2)
 
 	return sol1, sol2
@@ -117,79 +117,90 @@ func evalPattern(pattern [][]rune) (int, int) {
 		}
 	}
 
-	fmt.Printf("This has %d %d\n", val, aboveVal)
-	for _, p := range pattern {
-		fmt.Println(string(p))
-	}
-	fmt.Println("===")
-
 	return val, aboveVal
 
 }
 
-func fixSmudge(pattern [][]rune) [][]rune {
+func evalPatternWithSmudge(pattern [][]rune) (int, int) {
 
+	// check on columns
+	cols := len(pattern[0])
 	rows := len(pattern)
 
-	for i := 0; i < rows; i++ {
-		for j := i + 1; j < rows; j++ {
-			distances := patternDistance(pattern[i], pattern[j])
-			if len(distances) == 1 {
-				idx := distances[0]
-				fmt.Printf("Pattern %s changing row %d[%d]\n", string(pattern[0]), i, idx)
-				current := pattern[i][idx]
-				if current == '.' {
-					pattern[i][idx] = '#'
-				} else {
-					pattern[i][idx] = '.'
-				}
-				// exactly one smudge, so we can stop
-				return pattern
-			}
-		}
-	}
-
-	cols := len(pattern[0])
-	columns := make([][]rune, 0)
+	columns := make([]string, 0)
 	for c := 0; c < cols; c++ {
-		column := make([]rune, rows)
+		column := ""
 		for j := 0; j < rows; j++ {
-			column[j] = pattern[j][c]
+			column = column + string(pattern[j][c])
 		}
 		columns = append(columns, column)
 
 	}
 
-	fmt.Println("Processing cols")
-	for i := 0; i < cols; i++ {
-		for j := i + 1; j < cols; j++ {
-			distances := patternDistance(columns[i], columns[j])
-			if len(distances) == 1 {
-				idx := distances[0]
-				fmt.Printf("Pattern %s changing col %d[%d]\n", string(pattern[0]), i, idx)
-				current := pattern[idx][i]
-				if current == '.' {
-					pattern[idx][i] = '#'
-				} else {
-					pattern[idx][i] = '.'
+	val := 0
+	var flips int
+	for i := 1; i < cols; i++ {
+		flips = 1
+		distance := stringDistance(columns[i-1], columns[i])
+		if distance <= flips {
+			found := true
+			flips -= distance
+
+			for j := 1; i+j < cols && i-j-1 >= 0; j++ {
+				distance = stringDistance(columns[i+j], columns[i-j-1])
+				if distance > flips {
+					found = false
+					break
 				}
-				return pattern
+				flips -= distance
 			}
+			if found && flips == 0 {
+				val = i
+			}
+
 		}
 	}
 
-	return pattern
+	// check rows
+
+	aboveVal := 0
+	for i := 1; i < rows; i++ {
+		flips = 1
+		distance := stringDistance(string(pattern[i-1]), string(pattern[i]))
+		if distance <= flips {
+			found := true
+			flips -= distance
+
+			for j := 1; i+j < rows && i-j-1 >= 0; j++ {
+				distance = stringDistance(string(pattern[i+j]), string(pattern[i-j-1]))
+				if distance > flips {
+					found = false
+					break
+				}
+				flips -= distance
+			}
+			if found && flips == 0 {
+				aboveVal = i * 100
+				break
+			}
+
+		}
+	}
+
+	return val, aboveVal
+
 }
 
-func patternDistance(a []rune, b []rune) []int {
+func stringDistance(a string, b string) int {
 
-	diffIndexes := make([]int, 0)
+	distance := 0
 	for i, _ := range a {
 		if a[i] != b[i] {
-			diffIndexes = append(diffIndexes, i)
+			distance++
+
 		}
 	}
 
-	return diffIndexes
+	return distance
 
 }

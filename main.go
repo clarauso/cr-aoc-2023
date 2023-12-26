@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/clarauso/cr-aoc-2023/day19"
+	"github.com/clarauso/cr-aoc-2023/day13"
 )
 
 func main() {
 
-	day19.Aplenty("day19/input.txt")
+	day13.PointOfIncidence("day13/input.txt")
 }
