@@ -17,7 +17,7 @@ func PointOfIncidence(inputFilePath string) (int, int) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	pattern := make([][]rune, 0)
+	pattern := make([]string, 0)
 	sol1 := 0
 	sol2 := 0
 
@@ -34,9 +34,9 @@ func PointOfIncidence(inputFilePath string) (int, int) {
 			sol2 += l2
 			sol2 += a2
 			// reset pattern
-			pattern = make([][]rune, 0)
+			pattern = make([]string, 0)
 		default:
-			pattern = append(pattern, utils.MapToRuneSlice(currentLine))
+			pattern = append(pattern, currentLine)
 		}
 	}
 
@@ -57,63 +57,39 @@ func PointOfIncidence(inputFilePath string) (int, int) {
 
 }
 
-func evalPattern(pattern [][]rune, smudge bool) (int, int) {
+func evalPattern(pattern []string, smudge bool) (int, int) {
 
-	// check on columns
-	cols := len(pattern[0])
-	rows := len(pattern)
-
-	columns := make([]string, 0)
-	for c := 0; c < cols; c++ {
-		column := ""
-		for j := 0; j < rows; j++ {
-			column = column + string(pattern[j][c])
-		}
-		columns = append(columns, column)
-
-	}
-
+	// if we are considering the pattern with the smudge
+	// we can flip one position
 	var totalFlipsAllowed int
 	if smudge {
 		totalFlipsAllowed = 1
 	} else {
 		totalFlipsAllowed = 0
 	}
-	val := 0
-	var flips int
-	for i := 1; i < cols; i++ {
-		flips = totalFlipsAllowed
-		distance := stringDistance(columns[i-1], columns[i])
-		if distance <= flips {
-			found := true
-			flips -= distance
-
-			for j := 1; i+j < cols && i-j-1 >= 0; j++ {
-				distance = stringDistance(columns[i+j], columns[i-j-1])
-				if distance > flips {
-					found = false
-					break
-				}
-				flips -= distance
-			}
-			if found && flips == 0 {
-				val = i
-			}
-
-		}
-	}
-
+	// build column slice and check it
+	columns := utils.TransposeStringSlice(pattern)
+	leftVal := getValue(columns, totalFlipsAllowed, 1)
 	// check rows
-	aboveVal := 0
+	aboveVal := getValue(pattern, totalFlipsAllowed, 100)
+
+	return leftVal, aboveVal
+
+}
+
+func getValue(sli []string, totalFlipsAllowed int, multiplier int) int {
+	output := 0
+	rows := len(sli)
+	var flips int
 	for i := 1; i < rows; i++ {
 		flips = totalFlipsAllowed
-		distance := stringDistance(string(pattern[i-1]), string(pattern[i]))
+		distance := stringDistance(sli[i-1], sli[i])
 		if distance <= flips {
 			found := true
 			flips -= distance
 
 			for j := 1; i+j < rows && i-j-1 >= 0; j++ {
-				distance = stringDistance(string(pattern[i+j]), string(pattern[i-j-1]))
+				distance = stringDistance(sli[i+j], sli[i-j-1])
 				if distance > flips {
 					found = false
 					break
@@ -121,15 +97,14 @@ func evalPattern(pattern [][]rune, smudge bool) (int, int) {
 				flips -= distance
 			}
 			if found && flips == 0 {
-				aboveVal = i * 100
+				output = i * multiplier
 				break
 			}
 
 		}
 	}
 
-	return val, aboveVal
-
+	return output
 }
 
 func stringDistance(a string, b string) int {

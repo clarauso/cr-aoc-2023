@@ -71,3 +71,21 @@ func (p1 Point) ManhattanDistance(p2 Point) int {
 	return int(xDelta + yDelta)
 
 }
+
+// Considering a slice of strings as a matrix of runes, swaps rows and columns
+func TransposeStringSlice(sli []string) []string {
+	cols := len(sli[0])
+	rows := len(sli)
+	// build column slice
+	columns := make([]string, 0)
+	for c := 0; c < cols; c++ {
+		column := ""
+		for j := 0; j < rows; j++ {
+			column = column + string(sli[j][c])
+		}
+		columns = append(columns, column)
+
+	}
+
+	return columns
+}

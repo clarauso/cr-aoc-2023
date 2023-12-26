@@ -14,7 +14,9 @@ import (
 
 func runTest(t *testing.T, toTest func(string) (int, int), inputFile string, expected1 int, expected2 int) {
 
-	log.Println(t.Name())
+	log.Printf("[ Start %s\n", t.Name())
+	defer log.Printf("] End %s\n", t.Name())
+
 	sol1, sol2 := toTest(inputFile)
 
 	log.Printf("Solution 1 %d, solution 2 %d", sol1, sol2)
