@@ -110,7 +110,7 @@ func getValue(sli []string, totalFlipsAllowed int, multiplier int) int {
 func stringDistance(a string, b string) int {
 
 	distance := 0
-	for i, _ := range a {
+	for i := range a {
 		if a[i] != b[i] {
 			distance++
 
