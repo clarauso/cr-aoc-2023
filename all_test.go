@@ -9,6 +9,7 @@ import (
 	"github.com/clarauso/cr-aoc-2023/day09"
 	"github.com/clarauso/cr-aoc-2023/day11"
 	"github.com/clarauso/cr-aoc-2023/day13"
+	"github.com/clarauso/cr-aoc-2023/day14"
 	"github.com/clarauso/cr-aoc-2023/day15"
 )
 
@@ -53,6 +54,11 @@ func TestDay11CosmicExpansion(t *testing.T) {
 func TestDay13PointOfIncidence(t *testing.T) {
 	filename := "day13/input.txt"
 	runTest(t, day13.PointOfIncidence, filename, 27_502, 31_947)
+}
+
+func TestDay14ReflectorDish(t *testing.T) {
+	filename := "day14/input.txt"
+	runTest(t, day14.ReflectorDish, filename, 112_773, 98_894)
 }
 
 func TestDay15LensLibrary(t *testing.T) {
